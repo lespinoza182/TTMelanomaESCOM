@@ -12,7 +12,7 @@ import time
 import AnalisisDeImagenes
 
 tiempoInicial = time.time()
-rutaImagen = ("C:/Users/lespi/OneDrive/Documentos/TT/PruebasPython/LeerImagen/imagenes/lesion1.bmp")
+rutaImagen = ("C:/Users/lespi/OneDrive/Documentos/TT/PruebasPython/LeerImagen/imagenes/lesion3.bmp")
 imagen = Image.open(rutaImagen)
 imagen.show()
 imagenGris = imagen
@@ -64,7 +64,7 @@ media = np.zeros(256)
 # Calculo de probabilidad acumulada y media acumulada a partir de histograma
 omega[0] = histogram[0]
 for i in range(len(histogram)):
-    omega[i] = omega[i - 1] + histogram[i] 
+    omega[i] = omega[i - 1] + histogram[i]
     media[i] = media[i - 1] + (i - 1) * histogram[i]
 sigmaB2 = 0
 mt = media[len(histogram) - 1]
@@ -130,4 +130,24 @@ imgDilatacion = ndimage.grey_dilation(imgDilatacion, size=(5,5)).astype(np.float
 imgDilatacion = imgDilatacion.reshape(height,width)
 imgDilatacion = Image.fromarray(imgDilatacion)
 imgDilatacion.show()
-        
+'''Apertura'''
+imgApertura = imgSinBorde
+imgApertura = ndimage.grey_erosion(imgApertura, size=(5,5)).astype(np.float32)
+imgApertura = imgApertura.reshape(height,width)
+imgApertura = Image.fromarray(imgApertura)
+imgApertura = ndimage.grey_dilation(imgApertura, size=(5,5)).astype(np.float32)
+imgApertura = imgApertura.reshape(height,width)
+imgApertura = Image.fromarray(imgApertura)
+imgApertura.show()
+'''Cerradura'''
+imgCerradura = imgSinBorde
+imgCerradura = ndimage.grey_dilation(imgCerradura, size=(5,5)).astype(np.float32)
+imgCerradura = imgCerradura.reshape(height,width)
+imgCerradura = Image.fromarray(imgCerradura)
+imgCerradura = ndimage.grey_erosion(imgCerradura, size=(5,5)).astype(np.float32)
+imgCerradura = imgCerradura.reshape(height,width)
+imgCerradura = Image.fromarray(imgCerradura)
+imgCerradura.show()
+tiempoFinal = time.time()
+tiempoTotal = tiempoFinal - tiempoInicial
+print('EL tiempo total de ejecucion es: ',tiempoTotal)
