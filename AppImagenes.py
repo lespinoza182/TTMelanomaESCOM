@@ -89,7 +89,7 @@ radio = min(centroImagen[0], centroImagen[1], width-centroImagen[0], height-cent
 print('Centro de la imagen: ',centroImagen,'Radio: ',radio)
 Y, X = np.ogrid[:height, :width]
 distanciaCentro = np.sqrt((X - centroImagen[0])**2 + (Y - centroImagen[1])**2)
-print('Y: ',y,'X: ',x,'Distancia del Centro: ',distanciaCentro)
+#print('Y: ',y,'X: ',x,'Distancia del Centro: ',distanciaCentro)
 mask = distanciaCentro <= radio
 imMask = imOtsu.copy()
 sh1, sh2 = np.shape(imMask)
@@ -103,29 +103,37 @@ imgSinBorde.show()
 '''Morfología Matemática: Apertura'''
 #Erosión
 a = np.asarray(imgSinBorde, dtype = np.float32)
-xmin = 1
-xmax = height - 1
-ymin = 1
-ymax = width - 1
-imgErosion = np.zeros((height,width), dtype = np.float32)
-for x in range(xmin, xmax):
-    for y in range(ymin, ymax):
-        aux = min(a[x,y], a[x-1,y], a[x+1,y], a[x,y-1], a[x,y+1])
-        imgErosion[x,y] = aux
+#Es necesario aumentar el rango para más ciclos
+for z in range(1, 3):
+    xmin = 1
+    xmax = height - 1
+    ymin = 1
+    ymax = width - 1
+    imgErosion = np.zeros((height,width), dtype = np.float32)
+    for x in range(xmin, xmax):
+        for y in range(ymin, ymax):
+            aux = max(a[x,y], a[x-1,y], a[x+1,y], a[x,y-1], a[x,y+1])
+            imgErosion[x,y] = aux
+    a = imgErosion
+imgErosion = a
 imgErosion = imgErosion.reshape(height,width)
 imgErosion = Image.fromarray(imgErosion)
 imgErosion.show()
 #Dilatación
 b = np.asarray(imgErosion, dtype = np.float32)
-xmin = 1
-xmax = height - 1
-ymin = 1
-ymax = width - 1
-imgDilatacion = np.zeros((height,width), dtype = np.float32)
-for x in range(xmin, xmax):
-    for y in range(ymin, ymax):
-        aux = max(b[x,y], b[x-1,y], b[x+1,y], b[x,y-1], b[x,y+1])
-        imgDilatacion[x,y] = aux
+#Es necesario aumentar el rango para más ciclos
+for z in range(1, 2):
+    xmin = 1
+    xmax = height - 1
+    ymin = 1
+    ymax = width - 1
+    imgDilatacion = np.zeros((height,width), dtype = np.float32)
+    for x in range(xmin, xmax):
+        for y in range(ymin, ymax):
+            aux = min(b[x,y], b[x-1,y], b[x+1,y], b[x,y-1], b[x,y+1])
+            imgDilatacion[x,y] = aux
+    b = imgDilatacion
+imgDilatacion = b
 imgDilatacion = imgDilatacion.reshape(height,width)
 imgDilatacion = Image.fromarray(imgDilatacion)
 imgApertura = imgDilatacion
