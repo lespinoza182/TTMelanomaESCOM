@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-@author: luisespinoza
+@author: luisespinoza, manuelarreola
 """
 from PIL import Image
 from matplotlib import pyplot as plt
@@ -19,22 +19,6 @@ imagenGris = imagen
 imagenGris = imagen.convert('L')
 imagenGris.show()
 AnalisisDeImagenes.histograma(imagenGris)
-'''Imagen a Escala de Grises
-i = 0
-while i < imagenGris.size[0]:
-    j = 0
-    while j < imagenGris.size[1]:
-        r, g, b = imagenGris.getpixel((i,j))
-        # Promedio de los colores
-        gr = (r + g + b) / 3
-        gris = int(gr)
-        # Tupla de los 3 colores a gris
-        pixel = tuple([gris, gris, gris])
-        # Se intrudice la tupla como el pixel correspondiente
-        imagenGris.putpixel((i,j), pixel)
-        j += 1
-    i += 1
-imagenGris.show()'''
 '''Filtro de la Mediana'''
 [ren, col] = imagenGris.size
 matriz = np.asarray(imagenGris, dtype = np.float32)
@@ -90,7 +74,6 @@ loc = 0
 for y in range(ymin, ymax):
     for x in range(xmin, xmax):
         loc = y * width + x
-        #print('Y: ',y,'* width: ',width,' + x: ',x,' = ',loc)
         if imgAux[loc] > thr:
             imgOut[loc] = 255
         else:
@@ -110,7 +93,6 @@ print('Y: ',y,'X: ',x,'Distancia del Centro: ',distanciaCentro)
 mask = distanciaCentro <= radio
 imMask = imOtsu.copy()
 sh1, sh2 = np.shape(imMask)
-#imMask = np.ndarray(shape=(sh1,sh2))
 imMask = np.asarray(imMask, dtype = np.float32)
 maskedImg = imMask.copy()
 maskedImg[~mask] = 255
@@ -118,36 +100,36 @@ imgthr2 = maskedImg
 imgSinBorde = imgthr2.reshape(height,width)
 imgSinBorde = Image.fromarray(imgSinBorde)
 imgSinBorde.show()
-'''Morfología Matemática: Erosión'''
-imgErosion = imgSinBorde
-imgErosion = ndimage.grey_erosion(imgErosion, size=(5,5)).astype(np.float32)
+'''Morfología Matemática: Apertura'''
+#Erosión
+a = np.asarray(imgSinBorde, dtype = np.float32)
+xmin = 1
+xmax = height - 1
+ymin = 1
+ymax = width - 1
+imgErosion = np.zeros((height,width), dtype = np.float32)
+for x in range(xmin, xmax):
+    for y in range(ymin, ymax):
+        aux = min(a[x,y], a[x-1,y], a[x+1,y], a[x,y-1], a[x,y+1])
+        imgErosion[x,y] = aux
 imgErosion = imgErosion.reshape(height,width)
 imgErosion = Image.fromarray(imgErosion)
 imgErosion.show()
-'''Morfología Matemática: Dilatación'''
-imgDilatacion = imgSinBorde
-imgDilatacion = ndimage.grey_dilation(imgDilatacion, size=(5,5)).astype(np.float32)
+#Dilatación
+b = np.asarray(imgErosion, dtype = np.float32)
+xmin = 1
+xmax = height - 1
+ymin = 1
+ymax = width - 1
+imgDilatacion = np.zeros((height,width), dtype = np.float32)
+for x in range(xmin, xmax):
+    for y in range(ymin, ymax):
+        aux = max(b[x,y], b[x-1,y], b[x+1,y], b[x,y-1], b[x,y+1])
+        imgDilatacion[x,y] = aux
 imgDilatacion = imgDilatacion.reshape(height,width)
 imgDilatacion = Image.fromarray(imgDilatacion)
-imgDilatacion.show()
-'''Apertura'''
-imgApertura = imgSinBorde
-imgApertura = ndimage.grey_erosion(imgApertura, size=(5,5)).astype(np.float32)
-imgApertura = imgApertura.reshape(height,width)
-imgApertura = Image.fromarray(imgApertura)
-imgApertura = ndimage.grey_dilation(imgApertura, size=(5,5)).astype(np.float32)
-imgApertura = imgApertura.reshape(height,width)
-imgApertura = Image.fromarray(imgApertura)
+imgApertura = imgDilatacion
 imgApertura.show()
-'''Cerradura'''
-imgCerradura = imgSinBorde
-imgCerradura = ndimage.grey_dilation(imgCerradura, size=(5,5)).astype(np.float32)
-imgCerradura = imgCerradura.reshape(height,width)
-imgCerradura = Image.fromarray(imgCerradura)
-imgCerradura = ndimage.grey_erosion(imgCerradura, size=(5,5)).astype(np.float32)
-imgCerradura = imgCerradura.reshape(height,width)
-imgCerradura = Image.fromarray(imgCerradura)
-imgCerradura.show()
 tiempoFinal = time.time()
 tiempoTotal = tiempoFinal - tiempoInicial
-print('EL tiempo total de ejecucion es: ',tiempoTotal)
+print('El tiempo total de ejecucion es: ',tiempoTotal)
