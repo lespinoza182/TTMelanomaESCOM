@@ -5,14 +5,16 @@
 """
 from PIL import Image
 from matplotlib import pyplot as plt
-from scipy import ndimage
+from numpy import array
 import numpy as np
 import statistics
 import time
+import math
+
 import AnalisisDeImagenes
 
 tiempoInicial = time.time()
-rutaImagen = ("C:/Users/lespi/OneDrive/Documentos/TT/PruebasPython/LeerImagen/imagenes/lesion3.bmp")
+rutaImagen = ("C:/Users/lespi/OneDrive/Documentos/TT/PruebasPython/LeerImagen/imagenes/lesion1.bmp")
 imagen = Image.open(rutaImagen)
 imagen.show()
 imagenGris = imagen
@@ -83,7 +85,8 @@ imOtsu = imgthr.reshape(height,width)
 imOtsu = Image.fromarray(imOtsu)
 imOtsu.show()
 #AnalisisDeImagenes.histograma(imOtsu)
-'''Máscara de la Imagen para quitar borde'''
+
+#Máscara de la Imagen para quitar borde
 centroImagen = [int(width/2), int(height/2)]
 radio = min(centroImagen[0], centroImagen[1], width-centroImagen[0], height-centroImagen[1])
 print('Centro de la imagen: ',centroImagen,'Radio: ',radio)
@@ -100,11 +103,12 @@ imgthr2 = maskedImg
 imgSinBorde = imgthr2.reshape(height,width)
 imgSinBorde = Image.fromarray(imgSinBorde)
 imgSinBorde.show()
+
 '''Morfología Matemática: Apertura'''
 #Erosión
 a = np.asarray(imgSinBorde, dtype = np.float32)
 #Es necesario aumentar el rango para más ciclos
-for z in range(1, 3):
+for z in range(1, 4):
     xmin = 1
     xmax = height - 1
     ymin = 1
@@ -122,7 +126,7 @@ imgErosion.show()
 #Dilatación
 b = np.asarray(imgErosion, dtype = np.float32)
 #Es necesario aumentar el rango para más ciclos
-for z in range(1, 2):
+for z in range(1, 4):
     xmin = 1
     xmax = height - 1
     ymin = 1
@@ -138,6 +142,30 @@ imgDilatacion = imgDilatacion.reshape(height,width)
 imgDilatacion = Image.fromarray(imgDilatacion)
 imgApertura = imgDilatacion
 imgApertura.show()
+'''Detección del Borde: Sobel'''
+sobel_x = [[-1,0,1],[-2,0,2],[-1,0,1]]
+sobel_y = [[-1,-2,-1],[0,0,0],[1,2,1]]
+sobel_x = np.array(sobel_x)
+sobel_y = np.array(sobel_y)
+imgSobel = np.asarray(imgApertura, dtype = np.float64)
+imgBorde = np.zeros((height,width), dtype = np.float64)
+xmin = 1
+xmax = height - 1
+ymin = 1
+ymax = width - 1
+for x in range(xmin, xmax):
+    for y in range(ymin, ymax):
+        pixel_x = (sobel_x[0,0]*imgSobel[x-1,y-1]) + (sobel_x[0,1]*imgSobel[x,y-1]) + (sobel_x[0,2]*imgSobel[x+1,y-1])\
+        + (sobel_x[1,0]*imgSobel[x-1,y]) + (sobel_x[1,1]*imgSobel[x,y]) + (sobel_x[1,2]*imgSobel[x+1,y])\
+        + (sobel_x[2,0]*imgSobel[x-1,y+1]) + (sobel_x[2,1]*imgSobel[x,y+1]) + (sobel_x[2,2]*imgSobel[x+1,y+1])
+        pixel_y = (sobel_y[0,0]*imgSobel[x-1,y-1]) + (sobel_y[0,1]*imgSobel[x,y-1]) + (sobel_y[0,2]*imgSobel[x+1,y-1])\
+        + (sobel_y[1,0]*imgSobel[x-1,y]) + (sobel_y[1,1]*imgSobel[x,y]) + (sobel_y[1,2]*imgSobel[x+1,y])\
+        + (sobel_y[2,0]*imgSobel[x-1,y+1]) + (sobel_y[2,1]*imgSobel[x,y+1]) + (sobel_y[2,2]*imgSobel[x+1,y+1])
+        val = math.sqrt((pixel_x*pixel_x)+(pixel_y*pixel_y))
+        imgBorde[x,y] = val
+imgBorde = imgBorde.reshape(height,width)
+imgBorde = Image.fromarray(imgBorde)
+imgBorde.show()
 tiempoFinal = time.time()
 tiempoTotal = tiempoFinal - tiempoInicial
 print('El tiempo total de ejecucion es: ',tiempoTotal)
