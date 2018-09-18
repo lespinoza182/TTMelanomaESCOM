@@ -166,6 +166,7 @@ for x in range(xmin, xmax):
 imgBorde = imgBorde.reshape(height,width)
 imgBorde = Image.fromarray(imgBorde)
 imgBorde.show()
+'''Negativo Imagen de Sobel'''
 imgBordeNeg = imgBorde
 i = 0
 while i < imgBordeNeg.size[0]:
