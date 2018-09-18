@@ -166,6 +166,17 @@ for x in range(xmin, xmax):
 imgBorde = imgBorde.reshape(height,width)
 imgBorde = Image.fromarray(imgBorde)
 imgBorde.show()
+imgBordeNeg = imgBorde
+i = 0
+while i < imgBordeNeg.size[0]:
+    j = 0
+    while j < imgBordeNeg.size[1]:
+        gris = imgBordeNeg.getpixel((i,j))
+        valor = 255 - gris
+        imgBordeNeg.putpixel((i, j), valor)
+        j+=1
+    i+=1
+imgBordeNeg.show()
 tiempoFinal = time.time()
 tiempoTotal = tiempoFinal - tiempoInicial
 print('El tiempo total de ejecucion es: ',tiempoTotal)
