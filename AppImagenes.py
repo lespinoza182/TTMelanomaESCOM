@@ -6,6 +6,8 @@
 from PIL import Image
 from matplotlib import pyplot as plt
 from numpy import array
+from collections import Counter
+import functools
 import numpy as np
 import statistics
 import time
@@ -14,9 +16,10 @@ import math
 import AnalisisDeImagenes
 
 tiempoInicial = time.time()
-rutaImagen = ("C:/Users/lespi/OneDrive/Documentos/TT/PruebasPython/LeerImagen/imagenes/lesion1.bmp")
+rutaImagen = ("/home/lespinoza182/Documentos/TTMelanomaESCOM-master/imagenes/lesion1.bmp")
 imagen = Image.open(rutaImagen)
 imagen.show()
+'''ANALISIS DE LA IMAGEN'''
 imagenGris = imagen
 imagenGris = imagen.convert('L')
 imagenGris.show()
@@ -178,6 +181,101 @@ while i < imgBordeNeg.size[0]:
         j+=1
     i+=1
 imgBordeNeg.show()
+'''Negativo Imagen Apertura'''
+imgAperturaNeg = imgApertura
+i = 0
+while i < imgAperturaNeg.size[0]:
+    j = 0
+    while j < imgAperturaNeg.size[1]:
+        gris = imgAperturaNeg.getpixel((i,j))
+        valor = 255 - gris
+        imgAperturaNeg.putpixel((i, j),valor)
+        j+=1
+    i+=1
+imgAperturaNeg.show()
+'''Suma de las Imágenes'''
+imgFinal = imagenGris
+i  = 0
+while i < imgAperturaNeg.size[0]:
+    j = 0
+    while j < imgAperturaNeg.size[1]:
+        if imgAperturaNeg.getpixel((i,j)) == 0:
+            imgFinal.putpixel((i,j),0)
+        j+=1
+    i+=1
+imgFinal.show()
+'''RECONOCIMIENTO DE PATRONES'''
+'''Matriz de Co-Ocurrencia'''
+[row, col]  = imgFinal.size
+imgCo = np.asarray(imgFinal, dtype = np.int)
+print(imgCo)
+histogram = np.array(imgFinal.histogram(),int) / (width * height)
+nivelesGris = len(Counter(histogram))
+print("Niv.Gris: ",nivelesGris,"Row: ",row,"Col: ")
+datos = imgCo
+datos=np.asarray(datos)
+[ren, col] = datos.shape
+total = ren * col
+nm = datos.reshape((1, total))
+nm = max(nm)
+x=max(nm)
+"""0º Grados"""
+print("-----0º Grados-----")
+cero = np.zeros((x + 1, x + 1))
+cont = 1
+i = 0
+while i < (total - 1):
+    n1 = nm[i]
+    n2 = nm[i + 1]
+    cero[n1, n2] = cero[n1, n2] + 1
+    cero[n2, n1] = cero[n2, n1] + 1
+    if(cont == (ren - 1)):
+        i = i + 2
+        cont = 1
+    else:
+        i = i + 1
+        cont = cont + 1
+print(cero)
+[ren, col]  = cero.shape
+entropy  = energy = contrast = homogeneity = None
+prob_ac = 0
+normalizer = functools.reduce(lambda x,y: x + sum(y), cero, 0)
+print("Ren: ",ren,"Col: ",col,"Normalizador: ",normalizer)
+for m in range(col):
+    for n in range(ren):
+        prob = (1.0 * cero[m][n]) / normalizer
+        if prob > prob_ac:
+            prob_ac = prob
+        if (prob >= 0.0001) and (prob <= 0.999):
+            log_prob = math.log(prob,2)
+        if prob < 0.0001:
+            log_prob = 0
+        if prob > 0.999:
+            log_prob = 0
+        if entropy is None:
+            entropy = -1.0 * prob * log_prob
+            continue
+        entropy += -1.0 * prob * log_prob
+        if energy is None:
+            energy = prob ** 2
+            continue
+        energy += prob ** 2
+        if contrast is None:
+            contrast = ((m - n)**2) * prob
+            continue
+        contrast += ((m - n)**2) * prob
+        if homogeneity is None:
+            homogeneity = prob / ((1 + abs(m - n))*1.0)
+            continue
+        homogeneity += prob / ((1 + abs(m - n))*1.0)
+if abs(entropy) < 0.0000001: entropy = 0.0
+print("\nVector de Características de la imagen: ")
+print("[Entropy: ",entropy)
+print(", Contrast: ",contrast)
+print(", Homogeneity: ",homogeneity)
+print(", Energy: ",energy)
+print(", Maximum Probability: ",prob_ac)
+print("]");
 tiempoFinal = time.time()
 tiempoTotal = tiempoFinal - tiempoInicial
 print('El tiempo total de ejecucion es: ',tiempoTotal)
