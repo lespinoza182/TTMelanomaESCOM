@@ -194,7 +194,7 @@ while i < imgAperturaNeg.size[0]:
     i+=1
 imgAperturaNeg.show()
 '''Suma de las Imágenes'''
-imgFinal = imagenGris
+imgFinal = imagen
 i  = 0
 while i < imgAperturaNeg.size[0]:
     j = 0
@@ -204,6 +204,16 @@ while i < imgAperturaNeg.size[0]:
         j+=1
     i+=1
 imgFinal.show()
+imgFinal = imagenGris
+i  = 0
+while i < imgAperturaNeg.size[0]:
+    j = 0
+    while j < imgAperturaNeg.size[1]:
+        if imgAperturaNeg.getpixel((i,j)) == 0:
+            imgFinal.putpixel((i,j),0)
+        j+=1
+    i+=1
+#imgFinal.show()
 '''RECONOCIMIENTO DE PATRONES'''
 '''Matriz de Co-Ocurrencia'''
 [row, col]  = imgFinal.size
