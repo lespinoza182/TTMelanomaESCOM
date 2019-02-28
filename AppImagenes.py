@@ -247,7 +247,7 @@ while i < (total - 1):
         cont = cont + 1
 print(cero)
 [ren, col]  = cero.shape
-entropy  = energy = contrast = homogeneity = None
+entropy  = energy = contrast = homogeneity = disimility = None
 prob_ac = 0
 normalizer = functools.reduce(lambda x,y: x + sum(y), cero, 0)
 print("Ren: ",ren,"Col: ",col,"Normalizador: ",normalizer)
@@ -265,19 +265,23 @@ for m in range(col):
         if entropy is None:
             entropy = -1.0 * prob * log_prob
             continue
-        entropy += -1.0 * prob * log_prob
+        entropy += -1.0 * prob * log_prob #Checked
         if energy is None:
             energy = prob ** 2
             continue
         energy += prob ** 2
-        if contrast is None:
+        if contrast is None: #Checked
             contrast = ((m - n)**2) * prob
             continue
         contrast += ((m - n)**2) * prob
         if homogeneity is None:
             homogeneity = prob / ((1 + abs(m - n))*1.0)
             continue
-        homogeneity += prob / ((1 + abs(m - n))*1.0)
+        homogeneity += prob / ((1 + abs(m - n))*1.0) #Checked
+        if disimility is None:
+            disimility = prob * abs(m - n)
+            continue
+        disimility += prob * abs(m - n)
 if abs(entropy) < 0.0000001: entropy = 0.0
 print("\nVector de Características de la imagen: ")
 print("[Entropy: ",entropy)
@@ -285,6 +289,7 @@ print(", Contrast: ",contrast)
 print(", Homogeneity: ",homogeneity)
 print(", Energy: ",energy)
 print(", Maximum Probability: ",prob_ac)
+print(", Disimility: ",disimility)
 print("]");
 tiempoFinal = time.time()
 tiempoTotal = tiempoFinal - tiempoInicial
