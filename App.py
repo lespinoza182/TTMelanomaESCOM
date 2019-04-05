@@ -5,10 +5,13 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from numpy import array
 from collections import Counter
+from future.utils import iteritems
 import functools
 import numpy as np
 import statistics
 import math
+
+summaries = {0.0: [(1.0242365045390383, 0.6914471928283035), (126.40197794109865, 45.77687582606286), (0.060063831495954574, 0.030717794981104433), (4.370861743142268e-05, 5.62369806099574e-05), (0.8709797624924934, 0.060302668690457986), (1.2281335657348589, 0.3317781009726293)], 1.0: [(3.383225884227825, 1.1037016568866371), (146.38428279895595, 71.25032873333409), (0.18411297625078762, 0.06653200009893352), (0.00047308312778469717, 0.0003914743469593683), (0.6521226309797367, 0.11039263753002759), (1.9805899089122163, 0.7749195306578894)]}
 
 def openImage(path):
     img = Image.open(path)
@@ -75,7 +78,6 @@ def imgOtsu(img):
                 sigmaB2max = sigmaB2
                 T = i
     thr = int(T)
-
     xmin, xmax = 0, width
     ymin, ymax = 0, height
     imgOut = np.zeros(width * height)
@@ -95,9 +97,7 @@ def imgOtsu(img):
 
 def imgMorphOpening(img):
     width, height = img.size
-    #Erosión
     a = np.asarray(img, dtype = np.float32)
-    #Es necesario aumentar el rango para más ciclos
     for z in range(1, 4):
         xmin = 1
         xmax = height - 1
@@ -112,9 +112,7 @@ def imgMorphOpening(img):
     imgErosion = a
     imgErosion = imgErosion.reshape(height,width)
     imgErosion = Image.fromarray(imgErosion)
-    #Dilatación
     b = np.asarray(imgErosion, dtype = np.float32)
-    #Es necesario aumentar el rango para más ciclos
     for z in range(1, 4):
         xmin = 1
         xmax = height - 1
@@ -166,7 +164,7 @@ def extract(img):
     total = ren * col
     nm = datos.reshape((1, total))
     nm = max(nm)
-    x=max(nm)
+    x = max(nm)
     cero = np.zeros((x + 1, x + 1))
     cont = 1
     i = 0
@@ -199,19 +197,19 @@ def extract(img):
             if entropy is None:
                 entropy = -1.0 * prob * log_prob
                 continue
-            entropy += -1.0 * prob * log_prob #Checked
+            entropy += -1.0 * prob * log_prob
             if energy is None:
                 energy = prob ** 2
                 continue
             energy += prob ** 2
-            if contrast is None: #Checked
+            if contrast is None:
                 contrast = ((m - n)**2) * prob
                 continue
             contrast += ((m - n)**2) * prob
             if homogeneity is None:
                 homogeneity = prob / ((1 + abs(m - n))*1.0)
                 continue
-            homogeneity += prob / ((1 + abs(m - n))*1.0) #Checked
+            homogeneity += prob / ((1 + abs(m - n))*1.0)
             if disimility is None:
                 disimility = prob * abs(m - n)
                 continue
@@ -243,7 +241,7 @@ def calculateProbability(x, mean, stdev):
 
 def calculateClassProbabilities(summaries, inputVector):
 	probabilities = {}
-	for classValue, classSummaries in summaries.iteritems():
+	for classValue, classSummaries in iteritems(summaries):
 		probabilities[classValue] = 1
 		for i in range(len(classSummaries)):
 			mean, stdev = classSummaries[i]
@@ -252,18 +250,16 @@ def calculateClassProbabilities(summaries, inputVector):
 	return probabilities
 
 def predict(summaries, inputVector):
-	#print("Input Vector: ",inputVector)
 	probabilities = calculateClassProbabilities(summaries, inputVector)
-	#print(probabilities)
 	bestLabel, bestProb = None, -1
-	for classValue, probability in probabilities.iteritems():
+	for classValue, probability in iteritems(probabilities):
 		if bestLabel is None or probability > bestProb:
 			bestProb = probability
 			bestLabel = classValue
-	#print(bestLabel)
 	return bestLabel
 
 path = ("/home/luisespinoza/Documentos/TT2/Desarrollo/Images/MelanomaTraining/IMD417.bmp")
 image = openImage(path)
 vector = processImage(image)
 best = predict(summaries, vector)
+print(best)
